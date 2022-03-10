@@ -24,6 +24,13 @@ impl FieldElement {
     pub fn mul(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num * other.num) % self.prime, self.prime)
     }
+
+    pub fn pow(&self, power: isize) -> FieldElement {
+        FieldElement::new(
+            self.num.pow(power.try_into().unwrap()) % self.prime,
+            self.prime,
+        )
+    }
 }
 
 #[test]
@@ -60,4 +67,12 @@ fn ecc_mul() {
     let c = FieldElement::new(10, 13);
 
     assert_eq!(FieldElement::mul(&a, &b), c);
+}
+
+#[test]
+fn ecc_pow() {
+    let a = FieldElement::new(3, 13);
+    let b = FieldElement::new(1, 13);
+
+    assert_eq!(FieldElement::pow(&a, 3), b);
 }
