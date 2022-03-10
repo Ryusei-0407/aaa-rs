@@ -20,6 +20,10 @@ impl FieldElement {
     pub fn sub(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num - other.num + self.prime) % self.prime, self.prime)
     }
+
+    pub fn mul(&self, other: &FieldElement) -> FieldElement {
+        FieldElement::new((self.num * other.num) % self.prime, self.prime)
+    }
 }
 
 #[test]
@@ -47,4 +51,13 @@ fn ecc_sub() {
     let c = FieldElement::new(5, 13);
 
     assert_eq!(FieldElement::sub(&b, &a), c);
+}
+
+#[test]
+fn ecc_mul() {
+    let a = FieldElement::new(3, 13);
+    let b = FieldElement::new(12, 13);
+    let c = FieldElement::new(10, 13);
+
+    assert_eq!(FieldElement::mul(&a, &b), c);
 }
