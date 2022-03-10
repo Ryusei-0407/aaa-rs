@@ -18,12 +18,7 @@ impl FieldElement {
     }
 
     pub fn sub(&self, other: &FieldElement) -> FieldElement {
-        let mut ans = self.num - other.num;
-        if ans < 0 {
-            ans += self.prime;
-        }
-
-        FieldElement::new(ans % self.prime, self.prime)
+        FieldElement::new((self.num - other.num + self.prime) % self.prime, self.prime)
     }
 }
 
