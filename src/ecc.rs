@@ -31,6 +31,13 @@ impl FieldElement {
             self.prime,
         )
     }
+
+    pub fn div(&self, power: isize) -> FieldElement {
+        FieldElement::new(
+            self.num.pow((power + self.prime - 1).try_into().unwrap()) % self.prime,
+            self.prime,
+        )
+    }
 }
 
 #[test]
@@ -75,4 +82,12 @@ fn ecc_pow() {
     let b = FieldElement::new(1, 13);
 
     assert_eq!(FieldElement::pow(&a, 3), b);
+}
+
+#[test]
+fn ecc_div() {
+    let a = FieldElement::new(7, 13);
+    let b = FieldElement::new(8, 13);
+
+    assert_eq!(FieldElement::div(&a, -3), b);
 }
