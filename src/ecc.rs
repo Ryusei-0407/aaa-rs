@@ -25,16 +25,18 @@ impl FieldElement {
         FieldElement::new((self.num * other.num) % self.prime, self.prime)
     }
 
-    pub fn pow(&self, power: isize) -> FieldElement {
+    pub fn pow(&self, exponent: isize) -> FieldElement {
         FieldElement::new(
-            self.num.pow(power.try_into().unwrap()) % self.prime,
+            self.num.pow(exponent.try_into().unwrap()) % self.prime,
             self.prime,
         )
     }
 
-    pub fn div(&self, power: isize) -> FieldElement {
+    pub fn div(&self, exponent: isize) -> FieldElement {
         FieldElement::new(
-            self.num.pow((power + self.prime - 1).try_into().unwrap()) % self.prime,
+            self.num
+                .pow((exponent + self.prime - 1).try_into().unwrap())
+                % self.prime,
             self.prime,
         )
     }
