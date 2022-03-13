@@ -21,13 +21,17 @@ impl Point {
         if self.a != other.a || self.b != other.b {
             panic!("Points {:?}, {:?} are not on the same curve", self, other)
         };
-
-        let x = self.x + other.x;
-        let y = self.y + other.y;
         let a = self.a;
         let b = self.b;
 
-        Point { x, y, a, b }
+        if self.x == other.x && self.y != other.y {
+            return Point::new(0, 0, a, b);
+        } else {
+            let x = self.x + other.x;
+            let y = self.y + other.y;
+
+            return Point::new(x, y, a, b);
+        }
     }
 }
 
@@ -54,4 +58,5 @@ fn point_add_inf() {
 
     assert_eq!(Point::add(&p1, &inf), p1);
     assert_eq!(Point::add(&inf, &p2), p2);
+    assert_eq!(Point::add(&p1, &p2), inf);
 }
