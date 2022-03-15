@@ -23,14 +23,22 @@ impl Point {
         };
         let a = self.a;
         let b = self.b;
+        let x = (self.x, other.x);
 
         if self.x == other.x && self.y != other.y {
             return Point::new(0, 0, a, b);
-        } else {
-            let x = self.x + other.x;
-            let y = self.y + other.y;
+        }
 
-            return Point::new(x, y, a, b);
+        match x {
+            (0, ..) => return Point::new(other.x, other.y, a, b),
+            (.., 0) => return Point::new(self.x, self.y, a, b),
+            _ => {
+                let s = (other.y - self.y) / (other.x - self.x);
+                let x = s.pow(2) - self.x - other.x;
+                let y = s * (self.x - x) - self.y;
+
+                return Point::new(x, y, a, b);
+            }
         }
     }
 }
@@ -48,6 +56,15 @@ fn point_new() {
 #[should_panic]
 fn point_new_panic() {
     let _p2 = Point::new(-1, -2, 5, 7);
+}
+
+#[test]
+fn point_add() {
+    let p1 = Point::new(2, 5, 5, 7);
+    let p2 = Point::new(-1, -1, 5, 7);
+    let ans = Point::new(3, -7, 5, 7);
+
+    assert_eq!(Point::add(&p1, &p2), ans);
 }
 
 #[test]
