@@ -5,7 +5,7 @@ pub struct FieldElement {
 }
 
 impl FieldElement {
-    pub fn new(num: isize, prime: isize) -> FieldElement {
+    fn new(num: isize, prime: isize) -> FieldElement {
         if num >= prime || num < 0 {
             panic!("Num {} not in field range 0 to {}", num, prime - 1)
         };
@@ -13,26 +13,26 @@ impl FieldElement {
         FieldElement { num, prime }
     }
 
-    pub fn add(&self, other: &FieldElement) -> FieldElement {
+    fn add(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num + other.num) % self.prime, self.prime)
     }
 
-    pub fn sub(&self, other: &FieldElement) -> FieldElement {
+    fn sub(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num - other.num + self.prime) % self.prime, self.prime)
     }
 
-    pub fn mul(&self, other: &FieldElement) -> FieldElement {
+    fn mul(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num * other.num) % self.prime, self.prime)
     }
 
-    pub fn pow(&self, exponent: isize) -> FieldElement {
+    fn pow(&self, exponent: isize) -> FieldElement {
         FieldElement::new(
             self.num.pow(exponent.try_into().unwrap()) % self.prime,
             self.prime,
         )
     }
 
-    pub fn div(&self, exponent: isize) -> FieldElement {
+    fn div(&self, exponent: isize) -> FieldElement {
         FieldElement::new(
             self.num
                 .pow((exponent + self.prime - 1).try_into().unwrap())

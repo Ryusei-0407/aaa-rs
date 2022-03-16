@@ -3,12 +3,5 @@
 version = 3
 
 [[package]]
-name = "coin-rs"
-version = "0.1.0"
-dependencies = [
- "ecc",
-]
-
-[[package]]
 name = "ecc"
 version = "0.1.0"

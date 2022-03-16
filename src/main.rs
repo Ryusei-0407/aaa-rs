@@ -1,5 +1,4 @@
-mod fieldelement;
-mod point;
+use ecc;
 
 fn main() {
     println!("OK!!");

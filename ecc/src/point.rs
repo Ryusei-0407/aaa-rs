@@ -7,7 +7,7 @@ pub struct Point {
 }
 
 impl Point {
-    pub fn new(x: isize, y: isize, a: isize, b: isize) -> Point {
+    fn new(x: isize, y: isize, a: isize, b: isize) -> Point {
         if x == 0 && y == 0 {
             Point { x, y, a, b }
         } else if y.pow(2) != x.pow(3) + a * x + b {
@@ -17,7 +17,7 @@ impl Point {
         }
     }
 
-    pub fn add(&self, other: &Point) -> Point {
+    fn add(&self, other: &Point) -> Point {
         if self.a != other.a || self.b != other.b {
             panic!("Points {:?}, {:?} are not on the same curve", self, other)
         };
@@ -34,8 +34,8 @@ impl Point {
 
         let x = (self.x, other.x);
         match x {
-            (0, ..) => return Point::new(other.x, other.y, a, b),
-            (.., 0) => return Point::new(self.x, self.y, a, b),
+            (0, ..) => Point::new(other.x, other.y, a, b),
+            (.., 0) => Point::new(self.x, self.y, a, b),
             _ => {
                 let s = if self.y == other.y {
                     (3 * self.x.pow(2) + a) / (2 * self.y)
@@ -45,7 +45,7 @@ impl Point {
                 let x = s.pow(2) - self.x - other.x;
                 let y = s * (self.x - x) - self.y;
 
-                return Point::new(x, y, a, b);
+                Point::new(x, y, a, b)
             }
         }
     }
