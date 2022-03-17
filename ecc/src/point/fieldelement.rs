@@ -1,11 +1,11 @@
 #[derive(Debug, PartialEq)]
 pub struct FieldElement {
-    num: isize,
-    prime: isize,
+    pub num: isize,
+    pub prime: isize,
 }
 
 impl FieldElement {
-    fn new(num: isize, prime: isize) -> FieldElement {
+    pub fn new(num: isize, prime: isize) -> FieldElement {
         if num >= prime || num < 0 {
             panic!("Num {} not in field range 0 to {}", num, prime - 1)
         };
@@ -13,26 +13,26 @@ impl FieldElement {
         FieldElement { num, prime }
     }
 
-    fn add(&self, other: &FieldElement) -> FieldElement {
+    pub fn add(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num + other.num) % self.prime, self.prime)
     }
 
-    fn sub(&self, other: &FieldElement) -> FieldElement {
+    pub fn sub(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num - other.num + self.prime) % self.prime, self.prime)
     }
 
-    fn mul(&self, other: &FieldElement) -> FieldElement {
+    pub fn mul(&self, other: &FieldElement) -> FieldElement {
         FieldElement::new((self.num * other.num) % self.prime, self.prime)
     }
 
-    fn pow(&self, exponent: isize) -> FieldElement {
+    pub fn pow(&self, exponent: isize) -> FieldElement {
         FieldElement::new(
             self.num.pow(exponent.try_into().unwrap()) % self.prime,
             self.prime,
         )
     }
 
-    fn div(&self, exponent: isize) -> FieldElement {
+    pub fn div(&self, exponent: isize) -> FieldElement {
         FieldElement::new(
             self.num
                 .pow((exponent + self.prime - 1).try_into().unwrap())
