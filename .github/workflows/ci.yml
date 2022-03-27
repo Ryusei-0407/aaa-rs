@@ -35,7 +35,7 @@ jobs:
           curl -LsSf ${{ matrix.os.nextest-url }} | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/bin
