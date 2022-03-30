@@ -157,7 +157,7 @@ fn point_new5() {
 }
 
 #[test]
-fn point_add() {
+fn point_add1() {
     let prime = 223;
     let a = FieldElement::new(0, prime);
     let b = FieldElement::new(7, prime);
@@ -167,8 +167,58 @@ fn point_add() {
     let p1 = Point::new(x1, y1, a, b);
     let p2 = Point::new(x2, y2, a, b);
 
-    let x = FieldElement::new(170, prime);
-    let y = FieldElement::new(142, prime);
+    let (x, y) = (FieldElement::new(170, prime), FieldElement::new(142, prime));
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::add(&p1, &p2), ans);
+}
+
+#[test]
+fn point_add2() {
+    let prime = 223;
+    let a = FieldElement::new(0, prime);
+    let b = FieldElement::new(7, prime);
+    let (x1, y1) = (FieldElement::new(170, prime), FieldElement::new(142, prime));
+    let (x2, y2) = (FieldElement::new(60, prime), FieldElement::new(139, prime));
+
+    let p1 = Point::new(x1, y1, a, b);
+    let p2 = Point::new(x2, y2, a, b);
+
+    let (x, y) = (FieldElement::new(220, prime), FieldElement::new(181, prime));
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::add(&p1, &p2), ans);
+}
+
+#[test]
+fn point_add3() {
+    let prime = 223;
+    let a = FieldElement::new(0, prime);
+    let b = FieldElement::new(7, prime);
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+    let (x2, y2) = (FieldElement::new(17, prime), FieldElement::new(56, prime));
+
+    let p1 = Point::new(x1, y1, a, b);
+    let p2 = Point::new(x2, y2, a, b);
+
+    let (x, y) = (FieldElement::new(215, prime), FieldElement::new(68, prime));
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::add(&p1, &p2), ans);
+}
+
+#[test]
+fn point_add4() {
+    let prime = 223;
+    let a = FieldElement::new(0, prime);
+    let b = FieldElement::new(7, prime);
+    let (x1, y1) = (FieldElement::new(143, prime), FieldElement::new(98, prime));
+    let (x2, y2) = (FieldElement::new(76, prime), FieldElement::new(66, prime));
+
+    let p1 = Point::new(x1, y1, a, b);
+    let p2 = Point::new(x2, y2, a, b);
+
+    let (x, y) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
     let ans = Point::new(x, y, a, b);
 
     assert_eq!(Point::add(&p1, &p2), ans);
