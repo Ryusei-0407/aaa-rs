@@ -297,12 +297,12 @@ fn point_scalar6() {
     let p = Point::new(x1, y1, a, b);
     let p2 = Point::add(&p, &p);
     let p4 = Point::add(&p2, &p2);
-    let p5 = Point::add(&p, &p4);
     let p8 = Point::add(&p4, &p4);
     let p16 = Point::add(&p8, &p8);
+    let p20 = Point::add(&p16, &p4);
 
     let (x, y) = (FieldElement::new(0, prime), FieldElement::new(0, prime));
     let ans = Point::new(x, y, a, b);
 
-    assert_eq!(Point::add(&p5, &p16), ans);
+    assert_eq!(Point::add(&p, &p20), ans);
 }
