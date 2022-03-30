@@ -4,6 +4,33 @@ pub struct FieldElement {
     pub prime: isize,
 }
 
+fn modpow(base: &isize, exp: &isize, n: &isize) -> isize {
+    let (mut base, mut exp, n) = (*base, *exp, *n);
+    let n = n.abs();
+
+    if exp == 0 {
+        return 1;
+    }
+
+    let mut res: isize = 1;
+    base %= &n;
+
+    loop {
+        if &exp % 2 == 1 {
+            res *= &base;
+            res %= &n;
+        }
+
+        if exp == 1 {
+            return res;
+        }
+
+        exp /= 2;
+        base *= base.clone();
+        base %= &n;
+    }
+}
+
 impl FieldElement {
     pub fn new(num: isize, prime: isize) -> FieldElement {
         if num >= prime || num < 0 {
@@ -33,12 +60,9 @@ impl FieldElement {
     }
 
     pub fn div(&self, exponent: isize) -> FieldElement {
-        FieldElement::new(
-            self.num
-                .pow((exponent + self.prime - 1).try_into().unwrap())
-                % self.prime,
-            self.prime,
-        )
+        let (base, n) = (&self.num, &self.prime);
+        let exp = exponent + n - 1;
+        FieldElement::new(modpow(&base, &exp, &n), self.prime)
     }
 }
 
