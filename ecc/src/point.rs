@@ -104,17 +104,17 @@ impl Point {
     }
 
     pub fn scalar(&self, s: usize) -> Point {
+        let mut ans = Point::new(
+            FieldElement::new(0, self.a.prime),
+            FieldElement::new(0, self.a.prime),
+            self.a,
+            self.b,
+        );
         let p = self.clone();
-        match s {
-            1 => p,
-            _ => {
-                let mut ans = self.clone();
-                for _i in 1..s {
-                    ans = Point::add(&ans, &p);
-                }
-                ans
-            }
+        for _i in 0..s {
+            ans = Point::add(&ans, &p);
         }
+        ans
     }
 }
 
