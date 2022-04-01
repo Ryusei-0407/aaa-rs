@@ -2,7 +2,7 @@ mod fieldelement;
 
 use fieldelement::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Point {
     x: FieldElement,
     y: FieldElement,
@@ -11,7 +11,7 @@ pub struct Point {
 }
 
 impl Point {
-    fn new(x: FieldElement, y: FieldElement, a: FieldElement, b: FieldElement) -> Point {
+    pub fn new(x: FieldElement, y: FieldElement, a: FieldElement, b: FieldElement) -> Point {
         if x.num == 0 && y.num == 0 {
             return Point { x, y, a, b };
         } else if a.num == 0
@@ -30,7 +30,7 @@ impl Point {
         }
     }
 
-    fn add(&self, other: &Point) -> Point {
+    pub fn add(&self, other: &Point) -> Point {
         if self.a.num != other.a.num || self.b.num != other.b.num {
             panic!("Points {:?}, {:?} are not on the same curve", self, other)
         };
@@ -99,6 +99,20 @@ impl Point {
                 );
 
                 Point::new(x, y, *a, *b)
+            }
+        }
+    }
+
+    pub fn scalar(&self, s: usize) -> Point {
+        let p = self.clone();
+        match s {
+            1 => p,
+            _ => {
+                let mut ans = self.clone();
+                for _i in 1..s {
+                    ans = Point::add(&ans, &p);
+                }
+                ans
             }
         }
     }
@@ -305,4 +319,154 @@ fn point_scalar6() {
     let ans = Point::new(x, y, a, b);
 
     assert_eq!(Point::add(&p, &p20), ans);
+}
+
+#[test]
+fn point_scaler1() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 1), ans);
+}
+
+#[test]
+fn point_scaler2() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(36, prime), FieldElement::new(111, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 2), ans);
+}
+
+#[test]
+fn point_scaler3() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(15, prime), FieldElement::new(137, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 3), ans);
+}
+
+#[test]
+fn point_scaler4() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(194, prime), FieldElement::new(51, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 4), ans);
+}
+
+#[test]
+fn point_scaler5() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(126, prime), FieldElement::new(96, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 5), ans);
+}
+
+#[test]
+fn point_scaler6() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(139, prime), FieldElement::new(137, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 6), ans);
+}
+
+#[test]
+fn point_scaler7() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(92, prime), FieldElement::new(47, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 7), ans);
+}
+
+#[test]
+fn point_scaler8() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(116, prime), FieldElement::new(55, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 8), ans);
+}
+
+#[test]
+fn point_scaler9() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(69, prime), FieldElement::new(86, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 9), ans);
+}
+
+#[test]
+fn point_scaler10() {
+    let prime = 223;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let (x1, y1) = (FieldElement::new(47, prime), FieldElement::new(71, prime));
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (FieldElement::new(154, prime), FieldElement::new(150, prime));
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::scalar(&p, 10), ans);
 }
