@@ -1,119 +1,69 @@
-#[derive(Debug, PartialEq, Copy, Clone)]
+use num::bigint::{BigInt, ToBigInt};
+use num::traits::{One, Zero};
+use std::ops::{Add, Mul, Sub};
+
+#[derive(Debug, PartialEq, Clone)]
 pub struct FieldElement {
-    pub num: isize,
-    pub prime: isize,
-}
-
-fn modpow(base: &isize, exp: &isize, n: &isize) -> isize {
-    let (mut base, mut exp, n) = (*base, *exp, *n);
-    let n = n.abs();
-
-    if exp == 0 {
-        return 1;
-    }
-
-    let mut res: isize = 1;
-    base %= &n;
-
-    loop {
-        if &exp % 2 == 1 {
-            res *= &base;
-            res %= &n;
-        }
-
-        if exp == 1 {
-            return res;
-        }
-
-        exp /= 2;
-        base *= base.clone();
-        base %= &n;
-    }
+    pub num: BigInt,
+    pub prime: BigInt,
 }
 
 impl FieldElement {
-    pub fn new(num: isize, prime: isize) -> FieldElement {
-        if num >= prime || num < 0 {
+    pub fn new(num: BigInt, prime: BigInt) -> FieldElement {
+        if num >= prime || num < Zero::zero() {
             panic!("Num {} not in field range 0 to {}", num, prime - 1)
         };
 
         FieldElement { num, prime }
     }
 
-    pub fn add(&self, other: &FieldElement) -> FieldElement {
-        FieldElement::new((self.num + other.num) % self.prime, self.prime)
+    pub fn div(&self, exp: BigInt) -> FieldElement {
+        let (base, n) = (&self.num, &self.prime);
+        let exp = exp + n - 1;
+
+        FieldElement::new(base.modpow(&exp, n), self.prime.clone())
     }
 
-    pub fn sub(&self, other: &FieldElement) -> FieldElement {
-        FieldElement::new((self.num - other.num + self.prime) % self.prime, self.prime)
-    }
-
-    pub fn mul(&self, other: &FieldElement) -> FieldElement {
-        FieldElement::new((self.num * other.num) % self.prime, self.prime)
-    }
-
-    pub fn pow(&self, exponent: isize) -> FieldElement {
+    pub fn pow(&self, exp: BigInt) -> FieldElement {
         FieldElement::new(
-            self.num.pow(exponent.try_into().unwrap()) % self.prime,
-            self.prime,
+            self.num
+                .pow(exp.try_into().unwrap())
+                .modpow(&1_i32.to_bigint().unwrap(), &self.prime),
+            self.prime.clone(),
         )
     }
+}
 
-    pub fn div(&self, exponent: isize) -> FieldElement {
-        let (base, n) = (&self.num, &self.prime);
-        let exp = exponent + n - 1;
-        FieldElement::new(modpow(&base, &exp, &n), self.prime)
+impl Add for FieldElement {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            num: (self.num + other.num).modpow(&One::one(), &self.prime),
+            prime: self.prime,
+        }
     }
 }
 
-#[test]
-fn ecc_new() {
-    let a = FieldElement::new(7, 13);
-    let b = FieldElement::new(6, 13);
+impl Sub for FieldElement {
+    type Output = Self;
 
-    assert_eq!(a, a);
-    assert_ne!(a, b);
+    fn sub(self, other: Self) -> Self {
+        let prime = &self.prime.clone();
+        Self {
+            num: (self.num - other.num + prime).modpow(&One::one(), prime),
+            prime: self.prime,
+        }
+    }
 }
 
-#[test]
-fn ecc_add() {
-    let a = FieldElement::new(7, 13);
-    let b = FieldElement::new(12, 13);
-    let c = FieldElement::new(6, 13);
+impl Mul for FieldElement {
+    type Output = Self;
 
-    assert_eq!(FieldElement::add(&a, &b), c);
-}
-
-#[test]
-fn ecc_sub() {
-    let a = FieldElement::new(7, 13);
-    let b = FieldElement::new(12, 13);
-    let c = FieldElement::new(5, 13);
-
-    assert_eq!(FieldElement::sub(&b, &a), c);
-}
-
-#[test]
-fn ecc_mul() {
-    let a = FieldElement::new(3, 13);
-    let b = FieldElement::new(12, 13);
-    let c = FieldElement::new(10, 13);
-
-    assert_eq!(FieldElement::mul(&a, &b), c);
-}
-
-#[test]
-fn ecc_pow() {
-    let a = FieldElement::new(3, 13);
-    let b = FieldElement::new(1, 13);
-
-    assert_eq!(FieldElement::pow(&a, 3), b);
-}
-
-#[test]
-fn ecc_div() {
-    let a = FieldElement::new(7, 13);
-    let b = FieldElement::new(8, 13);
-
-    assert_eq!(FieldElement::div(&a, -3), b);
+    fn mul(self, other: Self) -> Self {
+        Self {
+            num: (self.num * other.num).modpow(&One::one(), &self.prime),
+            prime: self.prime,
+        }
+    }
 }

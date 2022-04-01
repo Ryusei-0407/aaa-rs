@@ -1,6 +1,8 @@
 mod fieldelement;
 
 use fieldelement::*;
+use num::bigint::ToBigInt;
+use num::traits::Zero;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Point {
@@ -10,16 +12,17 @@ pub struct Point {
     b: FieldElement,
 }
 
-fn to_binary(n: usize) -> (String, usize) {
+/*
+fn to_binary(n: BigInt) -> (String, BigInt) {
     let mut n = n;
     let mut b = String::from("");
-    while n >= 1 {
-        if n % 2 == 0 {
+    while n >= Zero::zero() {
+        if n % 2 == Zero::zero() {
             b.push('0')
         } else {
             b.push('1')
         }
-        n /= 2;
+        n = n / 2;
     }
     b = b.chars().rev().collect();
 
@@ -27,27 +30,27 @@ fn to_binary(n: usize) -> (String, usize) {
 
     (b, l)
 }
+*/
 
 impl Point {
     pub fn new(x: FieldElement, y: FieldElement, a: FieldElement, b: FieldElement) -> Point {
-        if x.num == 0 && y.num == 0 {
-            return Point { x, y, a, b };
-        } else if a.num == 0
-            && FieldElement::pow(&y, 2) != FieldElement::add(&FieldElement::pow(&x, 3), &b)
+        if x.num == Zero::zero() && y.num == Zero::zero() {
+            Point { x, y, a, b }
+        } else if a.num == Zero::zero()
+            && FieldElement::pow(&y, 2_i32.to_bigint().unwrap())
+                != FieldElement::pow(&x, 3_i32.to_bigint().unwrap()) + b.clone()
         {
-            panic!("({:?}, {:?}) is not on the curve", x, y,)
-        } else if FieldElement::pow(&y, 2)
-            != FieldElement::add(
-                &FieldElement::add(&FieldElement::pow(&x, 3), &FieldElement::mul(&a, &x)),
-                &b,
-            )
+            panic!("({:?}, {:?}) is not on the curve", x, y)
+        } else if FieldElement::pow(&y, 2_i32.to_bigint().unwrap())
+            != FieldElement::pow(&x, 3_i32.to_bigint().unwrap()) + a.clone() * x.clone() + b.clone()
         {
             panic!("({:?}, {:?}) is not on the curve", x, y)
         } else {
-            return Point { x, y, a, b };
+            Point { x, y, a, b }
         }
     }
 
+    /*
     pub fn add(&self, other: &Point) -> Point {
         if self.a.num != other.a.num || self.b.num != other.b.num {
             panic!("Points {:?}, {:?} are not on the same curve", self, other)
@@ -153,22 +156,93 @@ impl Point {
         }
         ans
     }
+    */
+}
+
+#[test]
+fn fieldelement_new() {
+    let prime = 13_i32.to_bigint().unwrap();
+    let a = FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone());
+    let b = FieldElement::new(6_i32.to_bigint().unwrap(), prime.clone());
+
+    assert_eq!(a, a);
+    assert_ne!(a, b);
+}
+
+#[test]
+fn fieldelement_add() {
+    let prime = 13_i32.to_bigint().unwrap();
+    let a = FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone());
+    let b = FieldElement::new(12_i32.to_bigint().unwrap(), prime.clone());
+    let c = FieldElement::new(6_i32.to_bigint().unwrap(), prime.clone());
+
+    assert_eq!((a + b), c);
+}
+
+#[test]
+fn fieldelement_sub() {
+    let prime = 13_i32.to_bigint().unwrap();
+    let a = FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone());
+    let b = FieldElement::new(12_i32.to_bigint().unwrap(), prime.clone());
+    let c = FieldElement::new(5_i32.to_bigint().unwrap(), prime.clone());
+
+    assert_eq!((b - a), c);
+}
+
+#[test]
+fn fieldelement_mul() {
+    let prime = 13_i32.to_bigint().unwrap();
+    let a = FieldElement::new(3_i32.to_bigint().unwrap(), prime.clone());
+    let b = FieldElement::new(12_i32.to_bigint().unwrap(), prime.clone());
+    let c = FieldElement::new(10_i32.to_bigint().unwrap(), prime.clone());
+
+    assert_eq!((a * b), c);
+}
+
+#[test]
+fn fieldelement_pow() {
+    let prime = 13_i32.to_bigint().unwrap();
+    let a = FieldElement::new(3_i32.to_bigint().unwrap(), prime.clone());
+    let b = FieldElement::new(1_i32.to_bigint().unwrap(), prime.clone());
+
+    assert_eq!(FieldElement::pow(&a, 3_i32.to_bigint().unwrap()), b);
+}
+
+#[test]
+fn fieldelement_div() {
+    let prime = 13_i32.to_bigint().unwrap();
+    let a = FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone());
+    let b = FieldElement::new(8_i32.to_bigint().unwrap(), prime.clone());
+
+    assert_eq!(FieldElement::div(&a, -3_i32.to_bigint().unwrap()), b);
 }
 
 #[test]
 fn point_new1() {
-    let prime = 223;
-    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
-    let (x, y) = (FieldElement::new(192, prime), FieldElement::new(105, prime));
+    let prime = 223_i32.to_bigint().unwrap();
+    let (a, b) = (
+        FieldElement::new(Zero::zero(), prime.clone()),
+        FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone()),
+    );
+    let (x, y) = (
+        FieldElement::new(192_i32.to_bigint().unwrap(), prime.clone()),
+        FieldElement::new(105_i32.to_bigint().unwrap(), prime.clone()),
+    );
 
     let _p1 = Point::new(x, y, a, b);
 }
 
 #[test]
 fn point_new2() {
-    let prime = 223;
-    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
-    let (x, y) = (FieldElement::new(17, prime), FieldElement::new(56, prime));
+    let prime = 223_i32.to_bigint().unwrap();
+    let (a, b) = (
+        FieldElement::new(Zero::zero(), prime.clone()),
+        FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone()),
+    );
+    let (x, y) = (
+        FieldElement::new(17_i32.to_bigint().unwrap(), prime.clone()),
+        FieldElement::new(56_i32.to_bigint().unwrap(), prime.clone()),
+    );
 
     let _p2 = Point::new(x, y, a, b);
 }
@@ -176,18 +250,30 @@ fn point_new2() {
 #[test]
 #[should_panic]
 fn point_new3() {
-    let prime = 223;
-    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
-    let (x, y) = (FieldElement::new(200, prime), FieldElement::new(119, prime));
+    let prime = 223_i32.to_bigint().unwrap();
+    let (a, b) = (
+        FieldElement::new(Zero::zero(), prime.clone()),
+        FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone()),
+    );
+    let (x, y) = (
+        FieldElement::new(200_i32.to_bigint().unwrap(), prime.clone()),
+        FieldElement::new(119_i32.to_bigint().unwrap(), prime.clone()),
+    );
 
     let _p3 = Point::new(x, y, a, b);
 }
 
 #[test]
 fn point_new4() {
-    let prime = 223;
-    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
-    let (x, y) = (FieldElement::new(1, prime), FieldElement::new(193, prime));
+    let prime = 223_i32.to_bigint().unwrap();
+    let (a, b) = (
+        FieldElement::new(Zero::zero(), prime.clone()),
+        FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone()),
+    );
+    let (x, y) = (
+        FieldElement::new(num::traits::One::one(), prime.clone()),
+        FieldElement::new(193_i32.to_bigint().unwrap(), prime.clone()),
+    );
 
     let _p4 = Point::new(x, y, a, b);
 }
@@ -195,13 +281,33 @@ fn point_new4() {
 #[test]
 #[should_panic]
 fn point_new5() {
-    let prime = 223;
-    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
-    let (x, y) = (FieldElement::new(42, prime), FieldElement::new(99, prime));
+    let prime = 223_i32.to_bigint().unwrap();
+    let (a, b) = (
+        FieldElement::new(Zero::zero(), prime.clone()),
+        FieldElement::new(7_i32.to_bigint().unwrap(), prime.clone()),
+    );
+    let (x, y) = (
+        FieldElement::new(42_i32.to_bigint().unwrap(), prime.clone()),
+        FieldElement::new(99_i32.to_bigint().unwrap(), prime.clone()),
+    );
 
     let _p5 = Point::new(x, y, a, b);
 }
 
+/*
+#[test]
+fn point_new6() {
+    let prime = 2_isize.pow(256) - 2_isize.pow(32) - 997;
+    let (a, b) = (FieldElement::new(0, prime), FieldElement::new(7, prime));
+    let x = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798isize;
+    let y = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8isize;
+    let (gx, gy) = (FieldElement::new(x, prime), FieldElement::new(y, prime));
+
+    let _p6 = Point::new(gx, gy, a, b);
+}
+*/
+
+/*
 #[test]
 fn point_add1() {
     let prime = 223;
@@ -415,3 +521,4 @@ fn point_mul10() {
 
     assert_eq!(Point::mul(&p, 10), ans);
 }
+*/
