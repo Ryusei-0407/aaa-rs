@@ -8,4 +8,4 @@ lint:
 	mold -run cargo clippy
 
 debug:
-	RUST_BACKTRACE=full mold -run cargo nextest run
+	RUST_BACKTRACE=1 mold -run cargo nextest run
