@@ -117,10 +117,7 @@ impl Add for Point {
         } else {
             let (x1, y1) = (self.x, self.y);
             let (x2, y2) = (other.x, other.y);
-            let one = FieldElement::new(U512::one(), prime);
-            let p = FieldElement::new(prime - U512::one(), prime);
-            (p + y2 - y1 + one.clone())
-                * FieldElement::div(&(p + x2 - x1 + one.clone()), U512::one())
+            (y2 - y1) * FieldElement::div(&(x2 - x1), U512::one())
         };
 
         let x = FieldElement::pow(&s, U512::from(2)) - self.x - other.x;
