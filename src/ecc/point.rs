@@ -139,7 +139,7 @@ fn point_new() {
     let y = U512::from("0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
     let (gx, gy) = (FieldElement::new(x, prime), FieldElement::new(y, prime));
 
-    let _p6 = Point::new(gx, gy, a, b);
+    let _p = Point::new(gx, gy, a, b);
 }
 
 #[test]
