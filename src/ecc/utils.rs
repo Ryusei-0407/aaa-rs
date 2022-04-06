@@ -25,24 +25,3 @@ pub fn modpow(base: U512, exp: U512, n: U512) -> U512 {
         b %= n;
     }
 }
-
-pub fn to_binary(n: U512) -> (String, usize) {
-    let mut n = n;
-    let mut b = String::from("");
-    loop {
-        if n.is_zero() {
-            break;
-        }
-        if (n % 2).is_zero() {
-            b.push('0')
-        } else {
-            b.push('1')
-        }
-        n /= 2;
-    }
-    b = b.chars().rev().collect();
-
-    let l = b.len();
-
-    (b, l)
-}

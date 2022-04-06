@@ -1,5 +1,4 @@
 use super::fieldelement::FieldElement;
-use super::utils::to_binary;
 use primitive_types::U512;
 use std::ops::Add;
 
@@ -34,10 +33,9 @@ impl Point {
             self.b,
         );
         let p = self.clone();
-        let (b, l) = to_binary(n);
+        let l = n.bits();
         for i in 0..l {
-            let (s, e) = (l - i - 1, l - i);
-            if &b[s..e] == "1" {
+            if n.bit(i) {
                 let q = Point::scalar(&p, 2_usize.pow(i.try_into().unwrap()));
                 ans = ans + q;
             }
