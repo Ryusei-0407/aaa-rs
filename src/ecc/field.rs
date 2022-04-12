@@ -3,33 +3,33 @@ use primitive_types::U512;
 use std::ops::{Add, Mul, Sub};
 
 #[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
-pub struct FieldElement {
+pub struct Field {
     pub num: U512,
     pub prime: U512,
 }
 
-impl FieldElement {
-    pub fn new(num: U512, prime: U512) -> FieldElement {
+impl Field {
+    pub fn new(num: U512, prime: U512) -> Field {
         if num >= prime || num < U512::zero() {
             panic!("Num {} not in field range 0 to {}", num, prime - 1)
         };
 
-        FieldElement { num, prime }
+        Field { num, prime }
     }
 
-    pub fn div(&self, exp: U512) -> FieldElement {
+    pub fn div(&self, exp: U512) -> Field {
         let (base, n) = (self.num, self.prime);
         let exp = n - exp - U512::one();
 
-        FieldElement::new(modpow(base, exp, n), self.prime)
+        Field::new(modpow(base, exp, n), self.prime)
     }
 
-    pub fn pow(&self, exp: U512) -> FieldElement {
-        FieldElement::new(modpow(self.num, exp, self.prime), self.prime)
+    pub fn pow(&self, exp: U512) -> Field {
+        Field::new(modpow(self.num, exp, self.prime), self.prime)
     }
 }
 
-impl Add for FieldElement {
+impl Add for Field {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -40,7 +40,7 @@ impl Add for FieldElement {
     }
 }
 
-impl Sub for FieldElement {
+impl Sub for Field {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -51,7 +51,7 @@ impl Sub for FieldElement {
     }
 }
 
-impl Mul for FieldElement {
+impl Mul for Field {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {

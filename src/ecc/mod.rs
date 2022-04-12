@@ -1,4 +1,4 @@
-pub mod fieldelement;
+pub mod field;
 pub mod point;
 pub mod secp256k1;
-pub mod utils;
+mod utils;

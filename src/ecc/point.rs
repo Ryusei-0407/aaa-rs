@@ -1,24 +1,22 @@
-use super::fieldelement::FieldElement;
+use super::field::Field;
 use primitive_types::U512;
 use std::ops::Add;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Point {
-    x: FieldElement,
-    y: FieldElement,
-    a: FieldElement,
-    b: FieldElement,
+    x: Field,
+    y: Field,
+    a: Field,
+    b: Field,
 }
 
 impl Point {
-    pub fn new(x: FieldElement, y: FieldElement, a: FieldElement, b: FieldElement) -> Point {
+    pub fn new(x: Field, y: Field, a: Field, b: Field) -> Point {
         if x.num.is_zero() && y.num.is_zero() {
             return Point { x, y, a, b };
         }
 
-        if FieldElement::pow(&y, U512::from(2))
-            != FieldElement::pow(&x, U512::from(3)) + (a * x) + b
-        {
+        if Field::pow(&y, U512::from(2)) != Field::pow(&x, U512::from(3)) + (a * x) + b {
             panic!("({:?}, {:?}) is not on the curve", x, y)
         }
 
@@ -27,8 +25,8 @@ impl Point {
 
     pub fn mul(&self, n: U512) -> Point {
         let mut ans = Point::new(
-            FieldElement::new(U512::zero(), self.a.prime),
-            FieldElement::new(U512::zero(), self.a.prime),
+            Field::new(U512::zero(), self.a.prime),
+            Field::new(U512::zero(), self.a.prime),
             self.a,
             self.b,
         );
@@ -45,8 +43,8 @@ impl Point {
 
     fn scalar(&self, k: usize) -> Point {
         let mut ans = Point::new(
-            FieldElement::new(U512::zero(), self.a.prime),
-            FieldElement::new(U512::zero(), self.a.prime),
+            Field::new(U512::zero(), self.a.prime),
+            Field::new(U512::zero(), self.a.prime),
             self.a,
             self.b,
         );
@@ -71,8 +69,8 @@ impl Add for Point {
 
         if self == other && self.y.num.is_zero() {
             return Self {
-                x: FieldElement::new(U512::zero(), prime),
-                y: FieldElement::new(U512::zero(), prime),
+                x: Field::new(U512::zero(), prime),
+                y: Field::new(U512::zero(), prime),
                 a,
                 b,
             };
@@ -80,8 +78,8 @@ impl Add for Point {
 
         if self.x == other.x && self.y != other.y {
             return Self {
-                x: FieldElement::new(U512::zero(), prime),
-                y: FieldElement::new(U512::zero(), prime),
+                x: Field::new(U512::zero(), prime),
+                y: Field::new(U512::zero(), prime),
                 a,
                 b,
             };
@@ -106,19 +104,15 @@ impl Add for Point {
         };
 
         let s = if self == other {
-            ((FieldElement::pow(&self.x, U512::from(2)) * FieldElement::new(U512::from(3), prime))
-                + a)
-                * (FieldElement::div(
-                    &(self.y * FieldElement::new(U512::from(2), prime)),
-                    U512::one(),
-                ))
+            ((Field::pow(&self.x, U512::from(2)) * Field::new(U512::from(3), prime)) + a)
+                * (Field::div(&(self.y * Field::new(U512::from(2), prime)), U512::one()))
         } else {
             let (x1, y1) = (self.x, self.y);
             let (x2, y2) = (other.x, other.y);
-            (y2 - y1) * FieldElement::div(&(x2 - x1), U512::one())
+            (y2 - y1) * Field::div(&(x2 - x1), U512::one())
         };
 
-        let x = FieldElement::pow(&s, U512::from(2)) - self.x - other.x;
+        let x = Field::pow(&s, U512::from(2)) - self.x - other.x;
         let y = (s * (self.x - x)) - self.y;
 
         Self { x, y, a, b }
@@ -130,12 +124,12 @@ fn point_new() {
     let prime =
         U512::from(2).pow(U512::from(256)) - U512::from(2).pow(U512::from(32)) - U512::from(977);
     let (a, b) = (
-        FieldElement::new(U512::zero(), prime),
-        FieldElement::new(U512::from(7), prime),
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
     );
     let x = U512::from("0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
     let y = U512::from("0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
-    let (gx, gy) = (FieldElement::new(x, prime), FieldElement::new(y, prime));
+    let (gx, gy) = (Field::new(x, prime), Field::new(y, prime));
 
     let _p = Point::new(gx, gy, a, b);
 }
@@ -144,19 +138,19 @@ fn point_new() {
 fn point_mul() {
     let prime = U512::from(223);
     let (a, b) = (
-        FieldElement::new(U512::zero(), prime),
-        FieldElement::new(U512::from(7), prime),
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
     );
     let (x1, y1) = (
-        FieldElement::new(U512::from(47), prime),
-        FieldElement::new(U512::from(71), prime),
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
     );
 
     let p = Point::new(x1, y1, a, b);
 
     let (x, y) = (
-        FieldElement::new(U512::from(154), prime),
-        FieldElement::new(U512::from(150), prime),
+        Field::new(U512::from(154), prime),
+        Field::new(U512::from(150), prime),
     );
 
     let ans = Point::new(x, y, a, b);
