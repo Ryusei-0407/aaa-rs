@@ -1,6 +1,8 @@
 use super::field::Field;
 use primitive_types::U512;
 use std::ops::Add;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Point {
@@ -24,20 +26,38 @@ impl Point {
     }
 
     pub fn mul(&self, n: U512) -> Point {
+        let v = Arc::new(Mutex::new(Vec::new()));
         let mut ans = Point::new(
             Field::new(U512::zero(), self.a.prime),
             Field::new(U512::zero(), self.a.prime),
             self.a,
             self.b,
         );
-        let p = self.clone();
-        let l = n.bits();
-        for i in 0..l {
+        let p = Arc::new(self.clone());
+        let len = n.bits();
+        let mut thrd = Vec::new();
+        for i in 0..len {
             if n.bit(i) {
-                let q = Point::scalar(&p, 2_usize.pow(i.try_into().unwrap()));
-                ans = ans + q;
+                let p = Arc::clone(&p);
+                let v = Arc::clone(&v);
+                let th = thread::spawn(move || {
+                    let mut v = v.lock().unwrap();
+                    v.push(Point::scalar(&p, 2_usize.pow(i.try_into().unwrap())));
+                });
+                thrd.push(th);
             }
         }
+
+        thrd.into_iter().for_each(|th| {
+            let _ = th.join().unwrap();
+        });
+
+        let v = v.lock().unwrap();
+        let len = v.len();
+        for i in 0..len {
+            ans = ans + v[i].clone();
+        }
+
         ans
     }
 
