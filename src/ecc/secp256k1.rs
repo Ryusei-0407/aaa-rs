@@ -37,13 +37,3 @@ pub fn secp256k1_zero() -> Point {
 
     Point::new(zero, zero, a, b)
 }
-
-/*
-#[test]
-fn zero() {
-    let g = secp256k1_g();
-    let ans = secp256k1_zero();
-
-    assert_eq!(Point::mul(&g, U512::from(N)), ans);
-}
-*/
