@@ -6,10 +6,10 @@ use std::thread;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Point {
-    x: Field,
-    y: Field,
-    a: Field,
-    b: Field,
+    pub x: Field,
+    pub y: Field,
+    pub a: Field,
+    pub b: Field,
 }
 
 impl Point {
