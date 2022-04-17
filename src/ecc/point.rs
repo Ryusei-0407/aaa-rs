@@ -1,10 +1,10 @@
 use super::field::Field;
 use primitive_types::U512;
-use std::ops::Add;
+use std::ops::{Add, AddAssign};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Point {
     pub x: Field,
     pub y: Field,
@@ -38,11 +38,13 @@ impl Point {
         let mut thrd = Vec::new();
         for i in 0..len {
             if n.bit(i) {
-                let p = Arc::clone(&p);
-                let v = Arc::clone(&v);
-                let th = thread::spawn(move || {
-                    let mut v = v.lock().unwrap();
-                    v.push(Point::scalar(&p, 2_usize.pow(i.try_into().unwrap())));
+                let th = thread::spawn({
+                    let p = Arc::clone(&p);
+                    let v = Arc::clone(&v);
+                    move || {
+                        let mut v = v.lock().unwrap();
+                        v.push(Point::scalar(&p, 2_usize.pow(i.try_into().unwrap())));
+                    }
                 });
                 thrd.push(th);
             }
@@ -55,24 +57,43 @@ impl Point {
         let v = v.lock().unwrap();
         let len = v.len();
         for i in 0..len {
-            ans = ans + v[i].clone();
+            ans += v[i];
         }
 
         ans
     }
 
     fn scalar(&self, k: usize) -> Point {
-        let mut ans = Point::new(
+        let ans = Mutex::new(Point::new(
             Field::new(U512::zero(), self.a.prime),
             Field::new(U512::zero(), self.a.prime),
             self.a,
             self.b,
-        );
+        ));
         let p = self.clone();
-        for _i in 0..k {
-            ans = ans + p.clone();
+        let n = k % 16;
+        let k = k / 16;
+        if n != 0 {
+            let mut ans = ans.lock().unwrap();
+            for _ in 0..n {
+                *ans += p;
+            }
         }
-        ans
+        thread::scope(|s| {
+            for _ in 0..16 {
+                s.spawn({
+                    |_| {
+                        let mut ans = ans.lock().unwrap();
+                        for _ in 0..k {
+                            *ans += p;
+                        }
+                    }
+                });
+            }
+        });
+
+        let result = *ans.lock().unwrap();
+        result
     }
 }
 
@@ -139,6 +160,18 @@ impl Add for Point {
     }
 }
 
+impl AddAssign for Point {
+    fn add_assign(&mut self, other: Self) {
+        let ans = *self + other;
+        *self = Self {
+            x: ans.x,
+            y: ans.y,
+            a: ans.a,
+            b: ans.b,
+        };
+    }
+}
+
 #[test]
 fn point_new() {
     let prime =
@@ -155,7 +188,195 @@ fn point_new() {
 }
 
 #[test]
-fn point_mul() {
+fn point_mul1() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::mul(&p, U512::one()), ans);
+}
+
+#[test]
+fn point_mul2() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+
+    let p = Point::new(x1, y1, a, b);
+
+    let (x, y) = (
+        Field::new(U512::from(36), prime),
+        Field::new(U512::from(111), prime),
+    );
+
+    let ans = Point::new(x, y, a, b);
+
+    assert_eq!(Point::mul(&p, U512::from(2)), ans);
+}
+
+#[test]
+fn point_mul3() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+    let p = Point::new(x1, y1, a, b);
+    let (x, y) = (
+        Field::new(U512::from(15), prime),
+        Field::new(U512::from(137), prime),
+    );
+    let ans = Point::new(x, y, a, b);
+    assert_eq!(Point::mul(&p, U512::from(3)), ans);
+}
+
+#[test]
+fn point_mul4() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+    let p = Point::new(x1, y1, a, b);
+    let (x, y) = (
+        Field::new(U512::from(194), prime),
+        Field::new(U512::from(51), prime),
+    );
+    let ans = Point::new(x, y, a, b);
+    assert_eq!(Point::mul(&p, U512::from(4)), ans);
+}
+
+#[test]
+fn point_mul5() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+    let p = Point::new(x1, y1, a, b);
+    let (x, y) = (
+        Field::new(U512::from(126), prime),
+        Field::new(U512::from(96), prime),
+    );
+    let ans = Point::new(x, y, a, b);
+    assert_eq!(Point::mul(&p, U512::from(5)), ans);
+}
+
+#[test]
+fn point_mul6() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+    let p = Point::new(x1, y1, a, b);
+    let (x, y) = (
+        Field::new(U512::from(139), prime),
+        Field::new(U512::from(137), prime),
+    );
+    let ans = Point::new(x, y, a, b);
+    assert_eq!(Point::mul(&p, U512::from(6)), ans);
+}
+
+#[test]
+fn point_mul7() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+    let p = Point::new(x1, y1, a, b);
+    let (x, y) = (
+        Field::new(U512::from(92), prime),
+        Field::new(U512::from(47), prime),
+    );
+    let ans = Point::new(x, y, a, b);
+    assert_eq!(Point::mul(&p, U512::from(7)), ans);
+}
+
+#[test]
+fn point_mul8() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+    let p = Point::new(x1, y1, a, b);
+    let (x, y) = (
+        Field::new(U512::from(116), prime),
+        Field::new(U512::from(55), prime),
+    );
+    let ans = Point::new(x, y, a, b);
+    assert_eq!(Point::mul(&p, U512::from(8)), ans);
+}
+
+#[test]
+fn point_mul9() {
+    let prime = U512::from(223);
+    let (a, b) = (
+        Field::new(U512::zero(), prime),
+        Field::new(U512::from(7), prime),
+    );
+    let (x1, y1) = (
+        Field::new(U512::from(47), prime),
+        Field::new(U512::from(71), prime),
+    );
+    let p = Point::new(x1, y1, a, b);
+    let (x, y) = (
+        Field::new(U512::from(69), prime),
+        Field::new(U512::from(86), prime),
+    );
+    let ans = Point::new(x, y, a, b);
+    assert_eq!(Point::mul(&p, U512::from(9)), ans);
+}
+
+#[test]
+fn point_mul10() {
     let prime = U512::from(223);
     let (a, b) = (
         Field::new(U512::zero(), prime),
