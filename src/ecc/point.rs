@@ -26,40 +26,20 @@ impl Point {
     }
 
     pub fn mul(&self, n: U512) -> Point {
-        let v = Arc::new(Mutex::new(Vec::new()));
         let mut ans = Point::new(
             Field::new(U512::zero(), self.a.prime),
             Field::new(U512::zero(), self.a.prime),
             self.a,
             self.b,
         );
-        let p = Arc::new(self.clone());
-        let len = n.bits();
-        let mut thrd = Vec::new();
-        for i in 0..len {
+        let p = self.clone();
+        let l = n.bits();
+        for i in 0..l {
             if n.bit(i) {
-                let th = thread::spawn({
-                    let p = Arc::clone(&p);
-                    let v = Arc::clone(&v);
-                    move || {
-                        let mut v = v.lock().unwrap();
-                        v.push(Point::scalar(&p, 2_usize.pow(i.try_into().unwrap())));
-                    }
-                });
-                thrd.push(th);
+                let q = Point::scalar(&p, 2_usize.pow(i.try_into().unwrap()));
+                ans = ans + q;
             }
         }
-
-        thrd.into_iter().for_each(|th| {
-            let _ = th.join().unwrap();
-        });
-
-        let v = v.lock().unwrap();
-        let len = v.len();
-        for i in 0..len {
-            ans += v[i];
-        }
-
         ans
     }
 
