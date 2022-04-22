@@ -1,7 +1,7 @@
 use super::field::Field;
 use primitive_types::U512;
 use std::ops::{Add, AddAssign};
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::thread;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -61,12 +61,10 @@ impl Point {
         }
         thread::scope(|s| {
             for _ in 0..16 {
-                s.spawn({
-                    |_| {
-                        let mut ans = ans.lock().unwrap();
-                        for _ in 0..k {
-                            *ans += p;
-                        }
+                s.spawn(|| {
+                    let mut ans = ans.lock().unwrap();
+                    for _ in 0..k {
+                        *ans += p;
                     }
                 });
             }
